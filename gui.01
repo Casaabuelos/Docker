@@ -1,0 +1,55 @@
+#! /usr/bin/bash
+echo "This script will help on connecting to devices via gui"
+http=80
+https=443
+gw=1808
+min=12567
+max=19999
+HEIGHT=15
+WIDTH=40
+CHOICE_HEIGHT=4
+BACKTITLE="Connecting to Devices"
+TITLE="Site Device"
+MENU="Choose one of the following options:"
+
+OPTIONS=(1 "SDS"
+         2 "Gateway"
+         3 "AIU")
+
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+clear
+case $CHOICE in
+        1)
+            echo "You chose SDS"
+            port=80
+            ;;
+        2)
+            echo "You chose Gateway"
+            port=1808
+            ;;
+        3)
+            echo "You chose AIU"
+            port=80
+            ;;
+esac
+
+YOURPORT=$(($RANDOM%($max-$min+1)+$min))
+#echo $port
+#echo $http
+#echo $https
+#echo $gw
+echo "Please enter site name"
+read site
+echo "You typed $site"
+echo "Please enter IP address"
+read ipaddress
+ssh -o ExitOnForwardFailure=yes -f -N -A -L $YOURPORT:localhost:$YOURPORT ops1.e911.io & 
+echo "SITE NODE:node1.cluster1.$site"
+opssh -L $YOURPORT:$ipaddress:$port $site &
+firefox http://localhost:$YOURPORT
